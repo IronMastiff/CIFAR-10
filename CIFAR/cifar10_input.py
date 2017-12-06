@@ -3,6 +3,7 @@
 import os
 
 import tensorflow.python.platform
+from six.moves import xrange
 import tensorflow as tf
 
 from tensorflow.python.platform import gfile
@@ -33,19 +34,19 @@ def read_cifar10( filename_queue ):
     result.label = tf.cast( tf.slice( record_bytes, [0], [label_bytes] ), tf.int32 )
     depth_major = tf.reshape( tf.slice( record_bytes, [label_bytes], [image_bytes] ), [result.depth,
                                                                                        result.height, result.width] )
-    result.uint8iamge = tf.transpose( depth_major, [1, 2, 0] )
+    result.uint8image = tf.transpose( depth_major, [1, 2, 0] )
     return result
 
-def _generate_iamge_and_label_batch( image, label, min_queue_examples, batch_size ):
+def _generate_image_and_label_batch( image, label, min_queue_examples, batch_size ):
     num_preprocess_threads = 16
-    images, label_batch = tf.train.suffle_batch(    #tf.train.shuffle_batch([example, label], batch_size=batch_size, capacity=capacity, min_after_dequeue) 将队列中的数据打乱后取出
+    images, label_batch = tf.train.shuffle_batch(    #tf.train.shuffle_batch([example, label], batch_size=batch_size, capacity=capacity, min_after_dequeue) 将队列中的数据打乱后取出
         [image, label],
         batch_size = batch_size,
         num_threads = num_preprocess_threads,
         capacity = min_queue_examples + 3 * batch_size,
-        min_after_duqueue = min_queue_examples
+        min_after_dequeue = min_queue_examples
     )
-    tf.image_summary( 'iamges', images )           #image_summary tf的图像数据可视化
+    # tf.image_summary( 'iamges', images )           #image_summary tf的图像数据可视化
 
     return images, tf.reshape( label_batch, [batch_size] )
 
@@ -70,7 +71,7 @@ def distorted_inputs( data_dir, batch_size ):                          #用于�
 
     distorted_iamge = tf.image.random_contrast( distorted_iamge, lower = 0.2, upper = 1.8 )
 
-    float_iamge = tf.image.per_iamge_whitening( distorted_iamge )
+    float_iamge = tf.image.per_image_whitening( distorted_iamge )
 
     min_fraction_of_examples_in_queue = 0.4
     min_queue_examples = int( NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN * min_fraction_of_examples_in_queue )
@@ -92,16 +93,16 @@ def inputs( eval_data, data_dir, batch_size ):                              #用
     filename_queue = tf.train.string_input_producer( filenames )
 
     read_input = read_cifar10( filename_queue )
-    reshaped_iamge = tf.cast( read_input.unit8image, tf.float32 )
+    reshaped_image = tf.cast( read_input.uint8image, tf.float32 )
 
     height = IMAGE_SIZE
     width = IMAGE_SIZE
 
-    resized_iamge = tf.iamge.resize_iamge_with_crop_or_pad( reshaped_iamge, width, height )       #中央裁剪
-    float_iamge = tf.iamge.per_image_whitening( resized_iamge )
+    resized_image = tf.image.resize_image_with_crop_or_pad( reshaped_image, width, height )       #中央裁剪
+    float_image = tf.image.per_image_standardization( resized_image )
     min_fraction_of_examples_in_queue = 0.4
     min_queue_examples = int( num_examples_per_epoch * min_fraction_of_examples_in_queue )
-    return _generate_iamge_and_label_batch( float_iamge, read_input.label, min_queue_examples, batch_size )
+    return _generate_image_and_label_batch( float_image, read_input.label, min_queue_examples, batch_size )
 
 
 

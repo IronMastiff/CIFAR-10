@@ -1,4 +1,7 @@
 from datetime import datetime
+import os.path
+import time
+
 import tensorflow.python.platform
 from tensorflow.python.platform import gfile
 
@@ -28,7 +31,7 @@ def train():
 
         saver = tf.train.Saver( tf.all_variables() )
 
-        summary_op = tf.merge_all_summaries()
+        summary_op = tf.summary.merge_all()
 
         init = tf.initialize_all_variables()
 
