@@ -13,7 +13,7 @@ from CIFAR import cifar10
 
 FLAGS = tf.app.flags.FLAGS
 
-tf.app.flags.DEFINE_string( 'train_dir', 'D:/PycharmProjects/CIFAR-10/cifar10_data', """Directory where to write event log""" )
+tf.app.flags.DEFINE_string( 'train_dir', '../cifar10_data', """Directory where to write event log""" )
 tf.app.flags.DEFINE_integer( 'max_steps', 1000000, """Number of batches to run.""" )
 tf.app.flags.DEFINE_boolean( 'log_device_placement', False, """Whether to log device placement""" )
 
@@ -60,7 +60,7 @@ def train():
                 summary_str = sess.run( summary_op )
                 summary_write.add_summary( summary_str, step )
 
-            if step % 1000 == 0:
+            if step % 1000 == 0 or (step + 1) == FLAGS.max_steps:
                 checkpoint_path = os.path.join( FLAGS.train_dir, 'model.ckpt' )
                 saver.save( sess, checkpoint_path, global_step = step )
 

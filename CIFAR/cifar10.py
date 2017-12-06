@@ -13,7 +13,7 @@ from CIFAR import cifar10_input
 FLAGS = tf.app.flags.FLAGS
 
 tf.app.flags.DEFINE_integer( 'batch_size', 128, """Nunber of image process in a batch""" )      #设置全局变量
-tf.app.flags.DEFINE_string( 'data_dir', 'cifar10_data', """Path to the CIFAR-10 data directory.""" )
+tf.app.flags.DEFINE_string( 'data_dir', '../cifar10_data', """Path to the CIFAR-10 data directory.""" )
 
 IMAGE_SIZE = cifar10_input.IMAGE_SIZE
 NUM_CLASSES = cifar10_input.NUM_CLASSES
